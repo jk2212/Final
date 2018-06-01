@@ -1,0 +1,17 @@
+plsql.execute <<-SQL
+SELECT  numero_cuota,
+  cuota_mensual ,
+  abono_capital ,
+  abono_interes ,
+  saldo,ROUND(SUM (abono_interes),2)
+  FROM amortizacion
+ORDER BY numero_cuota 
+SQL
+
+plsql.execute <<-SQL
+ Codigo va acá
+SQL
+
+plsql.execute <<-SQL
+ Codigo va acá
+SQL
