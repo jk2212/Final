@@ -62,5 +62,29 @@ END
 SQL
 
 plsql.execute <<-SQL
- Codigo va acá
+create or replace function SEQUENCE_SERIE(x in integer, y in integer)
+return  integer is
+z integer;
+
+f integer := REPLACE(x,0,'');
+
+begin
+if x = 0 then
+DBMS_OUTPUT.PUT_LINE('el valor 0 no se puede calcular');
+end if;
+
+for i IN 1..y LOOP
+    IF LENGTH(f) = 3 THEN
+            f := (SUBSTR(f, 1, 1) * SUBSTR(f, 2, 1) * SUBSTR(f, 3)) + f;
+        END IF;
+        IF LENGTH(f) = 2 THEN
+            f := (TO_NUMBER(SUBSTR(f, 1, 1)) * TO_NUMBER(SUBSTR(f, 2))) + f;
+        END IF;
+        IF LENGTH(f) = 1 THEN
+            f := f + f;
+        END IF;        
+    END LOOP;
+z := f;
+return z;
+end
 SQL
