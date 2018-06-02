@@ -1,15 +1,64 @@
 plsql.execute <<-SQL
-SELECT  numero_cuota,
+SELECT numero_total_cuotas,
   cuota_mensual ,
   abono_capital ,
   abono_interes ,
-  saldo,ROUND(SUM (abono_interes),2)
-  FROM amortizacion
-ORDER BY numero_cuota 
+  saldo, 
+  (SELECT  ROUND(SUM(abono_interes),2) 
+    FROM amortizacion
+    group by cuota_mensual) as total_interes
+     FROM amortizacion
+ 
+ORDER BY numero_total_cuotas ASC
 SQL
 
 plsql.execute <<-SQL
- Codigo va acá
+ CREATE OR REPLACE PROCEDURE CALCULAR_SIMULACION (tasa_efectiva_anual Decimal,total_cuotas number,valor_prestamo Decimal)AS
+abono_interes decimal (15,2);
+abono_capital decimal (15,2);
+saldo decimal(15,2);
+porcentaje Decimal(15,4);
+cuota_mensual decimal(15,2);
+n decimal (15,4);
+d decimal (15,4);
+valor_actual number;
+contador integer;
+tasa decimal(15,4);
+
+
+BEGIN
+delete from amortizacion;
+
+tasa:= power((1 + (tasa_efectiva_anual / 100)) , ((30 / 360)));
+tasa:= tasa - 1;
+saldo:=valor_prestamo;
+valor_actual:=total_cuotas;
+
+n:=tasa*saldo;
+d:= 1 - POWER((1 + tasa), ( -total_cuotas));
+
+cuota_mensual:=n/d;
+contador:=1;
+
+abono_interes := tasa * saldo;
+abono_capital := cuota_mensual - abono_interes;
+saldo:= saldo-abono_capital;
+
+while contador <= total_cuotas
+LOOP
+
+
+Insert INTO amortizacion (numero_total_cuotas ,cuota_mensual ,abono_capital ,abono_interes ,saldo)
+Values(contador,cuota_mensual,abono_capital,abono_interes,saldo);
+
+
+contador:=contador +1;
+abono_interes := tasa * saldo;
+abono_capital := cuota_mensual - abono_interes;
+saldo:= saldo-abono_capital;
+
+END LOOP;
+END
 SQL
 
 plsql.execute <<-SQL
